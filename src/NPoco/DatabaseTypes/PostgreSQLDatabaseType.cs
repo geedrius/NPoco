@@ -1,9 +1,16 @@
+using System;
 using System.Data;
 
 namespace NPoco.DatabaseTypes
 {
     public class PostgreSQLDatabaseType : DatabaseType
     {
+        public PostgreSQLDatabaseType()
+        {
+            AddTypeMap(typeof(TimeSpan), DbType.DateTimeOffset);
+            AddTypeMap(typeof(TimeSpan?), DbType.DateTimeOffset);
+        }
+
         public override object MapParameterValue(object value)
         {
             // Don't map bools to ints in PostgreSQL
