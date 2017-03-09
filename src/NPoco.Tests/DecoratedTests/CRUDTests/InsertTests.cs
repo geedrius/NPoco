@@ -1,4 +1,5 @@
 ﻿using System;
+using NPoco.DatabaseTypes;
 using NPoco.Tests.Common;
 using NUnit.Framework;
 
@@ -81,7 +82,7 @@ namespace NPoco.Tests.DecoratedTests.CRUDTests
             var verify = Database.SingleOrDefault<CompositeObjectDecorated>(@"
                 SELECT * 
                 FROM CompositeObjects
-                WHERE Key1ID = @0 AND Key2ID = @1 AND Key3ID = @2
+                WHERE Key1_ID = @0 AND Key2ID = @1 AND Key3ID = @2
             ", dataKey1ID, dataKey2ID, dataKey3ID);
             Assert.IsNotNull(verify);
 
@@ -101,6 +102,17 @@ namespace NPoco.Tests.DecoratedTests.CRUDTests
             var verify = Database.Single<UserDecoratedWithNullable>("select * from users where userid = @0", user.UserId);
             Assert.AreEqual(user.Name, verify.Name);
             Assert.AreEqual(user.Age, verify.Age);
+        }
+
+        [Test]
+        public void VerifyGuidGeneratedByDbIsSet()
+        {
+            var user = new GuidFromDb();
+            user.Name = "TestName";
+            Database.Insert(user);
+            var verify = Database.Single<GuidFromDb>("select * from guidfromdb");
+            Assert.AreEqual(user.Id, verify.Id);
+            Assert.AreEqual(user.Name, verify.Name);
         }
     }
 }

@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using NPoco.Expressions;
@@ -108,6 +109,28 @@ namespace NPoco.Tests.FluentTests.QueryTests
             var data = Database.Fetch<Dictionary<string, object>>("select userid, name from users where userid = 2");
             Assert.AreEqual(2, data[0]["userid"]);
             Assert.AreEqual("Name2", data[0]["name"]);
+        }
+
+        [Test]
+        public void ReturnDatetime()
+        {
+            var dateTime = DateTime.UtcNow;
+            var data = Database.Single<DateTime>("select @0", dateTime);
+            Assert.AreEqual(data.Date, dateTime.Date);
+        }
+
+        [Test]
+        public void ReturnInt()
+        {
+            var data = Database.Single<int>("select 2");
+            Assert.AreEqual(2, data);
+        }
+        
+        [Test]
+        public void QueryDictionary()
+        {
+            var data = Database.Dictionary<string, string>("select name, null from users");
+            Assert.AreEqual(null, data["Name1"]);
         }
     }
 }

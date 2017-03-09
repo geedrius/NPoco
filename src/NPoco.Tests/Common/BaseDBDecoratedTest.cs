@@ -27,7 +27,7 @@ namespace NPoco.Tests.Common
 
                 case 2: // SQL Local DB
                     TestDatabase = new SQLLocalDatabase();
-                    Database = new Database(TestDatabase.Connection, new SqlServer2008DatabaseType(), IsolationLevel.ReadUncommitted); // Need read uncommitted for the transaction tests
+                    Database = new Database(TestDatabase.Connection, new SqlServer2008DatabaseType() { UseOutputClause = true }, IsolationLevel.ReadUncommitted); // Need read uncommitted for the transaction tests
                     break;
 
                 case 3: // SQL Server
@@ -112,7 +112,7 @@ namespace NPoco.Tests.Common
             Assert.AreEqual(InMemoryExtraUserInfos.Count, userExtraInfoCount, "Test User Extra Info Data not in sync db has " + userExtraInfoCount + " records, but the in memory copy has only " + InMemoryExtraUserInfos.Count + " records.");
             System.Diagnostics.Debug.WriteLine("Created " + userExtraInfoCount + " test extra user info records for the unit tests.");
 
-            var compositeObjectCount = Database.ExecuteScalar<int>("SELECT COUNT(Key1ID) FROM CompositeObjects");
+            var compositeObjectCount = Database.ExecuteScalar<int>("SELECT COUNT(Key1_ID) FROM CompositeObjects");
             Assert.AreEqual(InMemoryCompositeObjects.Count, compositeObjectCount, "Test Composite Object Data not in sync db has " + compositeObjectCount + " records, but the in memory copy has only " + InMemoryCompositeObjects.Count + " records.");
             System.Diagnostics.Debug.WriteLine("Created " + compositeObjectCount + " test composite PK objects for the unit tests.");
         }

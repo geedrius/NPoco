@@ -93,9 +93,12 @@ namespace NPoco.Tests.Common
                     Is_Male tinyint,
                     UniqueId uniqueidentifier NULL,
                     TimeSpan time NULL,
-                    TestEnum varchar(10) NULL,
+                    TestEnum nvarchar(10) NULL,
                     HouseId int NULL,
                     SupervisorId int NULL,
+                    Version rowversion,
+                    VersionInt int default(0) NOT NULL,
+                    YorN char NULL
                 );
             ";
             cmd.ExecuteNonQuery();
@@ -120,12 +123,20 @@ namespace NPoco.Tests.Common
 
             cmd.CommandText = @"
                 CREATE TABLE CompositeObjects(
-                    Key1ID int PRIMARY KEY NOT NULL, 
+                    Key1_ID int PRIMARY KEY NOT NULL, 
                     Key2ID int NOT NULL, 
                     Key3ID int NOT NULL, 
                     TextData nvarchar(512) NULL, 
                     DateEntered datetime NOT NULL,
                     DateUpdated datetime NULL 
+                );
+            ";
+            cmd.ExecuteNonQuery();
+
+            cmd.CommandText = @"
+                CREATE TABLE GuidFromDb(
+                    Id uniqueidentifier PRIMARY KEY DEFAULT newid(), 
+                    Name nvarchar(30)  
                 );
             ";
             cmd.ExecuteNonQuery();

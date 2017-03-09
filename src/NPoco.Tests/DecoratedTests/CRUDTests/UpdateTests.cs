@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Data;
 using NPoco.Tests.Common;
 using NUnit.Framework;
 
@@ -34,7 +35,7 @@ namespace NPoco.Tests.DecoratedTests.CRUDTests
             var poco = Database.SingleOrDefault<CompositeObjectDecorated>(@"
                 SELECT * 
                 FROM CompositeObjects
-                WHERE Key1ID = @0 AND Key2ID = @1 AND Key3ID = @2
+                WHERE Key1_ID = @0 AND Key2ID = @1 AND Key3ID = @2
             ", InMemoryCompositeObjects[1].Key1ID, InMemoryCompositeObjects[1].Key2ID, InMemoryCompositeObjects[1].Key3ID);
             Assert.IsNotNull(poco);
 
@@ -44,7 +45,7 @@ namespace NPoco.Tests.DecoratedTests.CRUDTests
             var verify = Database.SingleOrDefault<CompositeObjectDecorated>(@"
                 SELECT * 
                 FROM CompositeObjects
-                WHERE Key1ID = @0 AND Key2ID = @1 AND Key3ID = @2
+                WHERE Key1_ID = @0 AND Key2ID = @1 AND Key3ID = @2
             ", InMemoryCompositeObjects[1].Key1ID, InMemoryCompositeObjects[1].Key2ID, InMemoryCompositeObjects[1].Key3ID);
             Assert.IsNotNull(verify);
 
@@ -71,6 +72,68 @@ namespace NPoco.Tests.DecoratedTests.CRUDTests
             Assert.AreEqual(poco.Name, verify.Name);
             Assert.AreNotEqual(InMemoryUsers[0].Age, verify.Age);
             Assert.AreNotEqual(poco.Savings, verify.Savings);
+        }
+
+        [Test]
+        public void UpdatePrimaryKeyVersionConcurrencyException()
+        {
+            var poco1 = Database.SingleOrDefaultById<UserTimestampVersionDecorated>(InMemoryUsers[1].UserId);
+            var poco2 = Database.SingleOrDefaultById<UserTimestampVersionDecorated>(InMemoryUsers[1].UserId);
+            
+            poco1.Age = 100;
+            Database.Update(poco1);
+
+            poco2.Age = 200;
+            Assert.Throws<DBConcurrencyException>(() => Database.Update(poco2));
+        }
+
+        [Test]
+        public void UpdatePrimaryKeyNoVersionConcurrencyException()
+        {
+            var poco1 = Database.SingleOrDefaultById<UserTimestampVersionDecorated>(InMemoryUsers[1].UserId);
+            
+            poco1.Age = 100;
+            Database.Update(poco1);
+
+            var poco2 = Database.SingleOrDefaultById<UserTimestampVersionDecorated>(InMemoryUsers[1].UserId);
+
+            poco2.Age = 200;
+            Database.Update(poco2);
+
+            var verify = Database.SingleOrDefaultById<UserTimestampVersionDecorated>(InMemoryUsers[1].UserId);
+
+            Assert.AreEqual(200, verify.Age);
+        }
+
+        [Test]
+        public void UpdatePrimaryKeyVersionIntConcurrencyException()
+        {
+            var poco1 = Database.SingleOrDefaultById<UserIntVersionDecorated>(InMemoryUsers[1].UserId);
+            var poco2 = Database.SingleOrDefaultById<UserIntVersionDecorated>(InMemoryUsers[1].UserId);
+
+            poco1.Age = 100;
+            Database.Update(poco1);
+
+            poco2.Age = 200;
+            Assert.Throws<DBConcurrencyException>(() => Database.Update(poco2));
+        }
+
+        [Test]
+        public void UpdatePrimaryKeyNoVersionIntConcurrencyException()
+        {
+            var poco1 = Database.SingleOrDefaultById<UserIntVersionDecorated>(InMemoryUsers[1].UserId);
+
+            poco1.Age = 100;
+            Database.Update(poco1);
+
+            var poco2 = Database.SingleOrDefaultById<UserIntVersionDecorated>(InMemoryUsers[1].UserId);
+
+            poco2.Age = 200;
+            Database.Update(poco2);
+
+            var verify = Database.SingleOrDefaultById<UserIntVersionDecorated>(InMemoryUsers[1].UserId);
+
+            Assert.AreEqual(200, verify.Age);
         }
     }
 }
